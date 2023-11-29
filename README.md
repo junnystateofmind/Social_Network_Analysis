@@ -34,6 +34,14 @@ The provided C++ code calculates the influence each node has in a network. Each 
    - `influence.csv` - Contains the influence score for each node.
    - `node_influence.csv` - Contains the influence score for each node formatted for Gephi input.
 
+### Algorithm Details
+
+The algorithm is implemented in the `Headquater_algorithm.cpp` file. The algorithm is implemented in the following steps:
+
+1. Read the network data from the `tweeter.csv` file.
+2. In every node, initialize the influence score to 1.0.
+3. In every iteration, propagate the influence score from each node to the nodes it follows. The influence score is divided equally among the nodes it follows but 
+
 ### Visualizing in Gephi
 
 1. Open Gephi and create a new project.
@@ -48,4 +56,10 @@ The provided C++ code calculates the influence each node has in a network. Each 
 
 The influence scores can provide insights into which nodes are central in spreading information or which nodes have the potential to be key influencers within the network.
 
+## Nov 29, 2023 Update
+-----------------
+- 기존의 전파 알고리즘에 오류가 있어서 수정하였고, 노드가 제대로 연결되었습니다.
+- 의도대로 구현 시, 노드의 영향력 간 차이가 매우 크게 나타나 이러한 편차를 줄이기 위해 다음과 같은 시도를 했습니다.
+  - 전파는 그대로 진행하되, Logarithm 적용하여 최종 출력하는 영향력을 조정하였습니다.
+- 이후 한 가지 고려사항으로, 노드에서 다음 노드에 영향력을 전파할 때 leak을 적용해 influence의 과도한 누적을 방지할까 합니다.
 

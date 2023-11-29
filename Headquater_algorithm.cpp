@@ -57,13 +57,16 @@ public:
     }
 
     void flow_influence_to_following() {
-        if (this->get_influence() >= 0.0) { // 영향력이 0.0 이상이면
-            for (auto& node : following) {
-                node->flow_influence(this->get_influence() / (following.size())); // 가진 영향력의 절반을 나눠준다.
-            }
+        for (auto& node : this->following) {
+            node->flow_influence(this->get_influence() / this->following.size()); // 가지고 있는 영향력을 N개의 노드에 나눠준다.
         }
-        this->influence -= this->get_influence() / 2; // 나눠준 영향력만큼 영향력을 빼준다.
+        this->influence -= this->get_influence(); // 나눠준 영향력만큼 영향력을 빼준다.
     }
+
+    void logarithmic_influence() { // 최종 출력 전 영향력을 로그함수로 변환한다.
+        this->influence = log(this->influence);
+    }
+
 };
 
 class Network {
@@ -86,11 +89,11 @@ public:
         add_node(id1); // id1 노드가 없으면 생성
         add_node(id2); // id2 노드가 없으면 생성
 
-        shared_ptr<Node> node1 = nodes_map[id1];
-        shared_ptr<Node> node2 = nodes_map[id2];
+        shared_ptr<Node> node1 = nodes_map[id1]; // id1 노드를 가져온다.
+        shared_ptr<Node> node2 = nodes_map[id2]; // id2 노드를 가져온다.
 
-        if (node1 && node2) {
-            node1->add_following(node2);
+        if (node1 && node2) { // 두 노드가 모두 존재하면
+            node1->add_following(node2); // node1의 following에 node2를 추가한다. 즉 id1이 id2를 following한다.
         }
     }
 
@@ -100,7 +103,7 @@ public:
 
     void flow_influence() {
         for (auto node : nodes) {
-            node->ready_influence();
+            node->ready_influence(); // 모든 노드의 영향력을 1.0 증가시킨다.
         }
         for (auto node : nodes) {
             node->flow_influence_to_following();
@@ -116,6 +119,12 @@ public:
             influence.push_back(node->get_influence());
         }
         return influence;
+    }
+
+    void logarithmic_influence() { // 최종 출력 전 영향력을 로그함수로 변환한다.
+        for (auto node : nodes) {
+            node->logarithmic_influence();
+        }
     }
 
     vector<shared_ptr<Node>> get_nodes() {
@@ -144,19 +153,19 @@ Network make_network(string file_name) {
     Network network;
     while (getline(file, line)) {
         stringstream ss(line);
-        string from, to;
-        if (!getline(ss, from, ',') || from.empty()) {
+        string to, from;
+        if (!getline(ss, to, ',') || to.empty()) {
             cerr << "Invalid or missing 'from' node in line: " << line << endl;
             continue; // 현재 줄 건너뛰기
         }
-        if (!getline(ss, to) || to.empty()) {
+        if (!getline(ss, from) || from.empty()) {
             cerr << "Invalid or missing 'to' node in line: " << line << endl;
             continue; // 현재 줄 건너뛰기
         }
 
         try {
-            int from_id = stoi(from);
             int to_id = stoi(to);
+            int from_id = stoi(from);
             network.add_following(from_id, to_id);
         } catch (const std::invalid_argument& e) {
             cerr << "Invalid argument: " << e.what() << endl;
@@ -188,12 +197,19 @@ void write_marked_csv(string file_name, vector<float> influence) {
 }
 
 
+
+
 int main() {
     Network network = make_network("tweeter.csv");
     // network.print();
-    for (int i = 0; i < 50; i++) {
+    for (int i = 0; i < 4; i++) {
         network.flow_influence();
     }
+    // 로그함수로 변환 전, 각 노드에 영향력을 1.0 증가시킨다.
+    for (auto node : network.get_nodes()) {
+        node->ready_influence();
+    }
+    network.logarithmic_influence(); // 최종 출력 전 영향력을 로그함수로 변환한다.
     vector<float> influence = network.get_influence();
     // for (size_t i = 0; i < influence.size(); i++) {
     //     cout << i << " : " << influence[i] << endl;

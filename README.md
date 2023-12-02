@@ -63,3 +63,10 @@ The influence scores can provide insights into which nodes are central in spread
   - 전파는 그대로 진행하되, Logarithm 적용하여 최종 출력하는 영향력을 조정하였습니다.
 - 이후 한 가지 고려사항으로, 노드에서 다음 노드에 영향력을 전파할 때 leak을 적용해 influence의 과도한 누적을 방지할까 합니다.
 
+## DEC 2, 2023 Update
+-----------------
+- DECAY_RATE를 적용해, following이 없어 영향력이 계속해서 누적되는 경우 decay를 적용하였습니다
+- Log scale을 10으로 적용했고, 이에 따라 초기 노드의 영향력을 10으로 설정하였습니다.
+- 출력하면 0~3까지의 4단계의 노드로 분류하도록 하였습니다.
+
+[Prototype.pdf](./Prototype.pdf)

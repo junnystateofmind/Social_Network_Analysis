@@ -8,6 +8,8 @@
 
 using namespace std;
 
+#define DECAY_RATE 0.2
+
 class Node {
 private:
     vector<shared_ptr<Node>> following;
@@ -17,7 +19,7 @@ private:
     float temp_influence;
 
 public:
-    Node(int id) : id(id), influence(1.0), temp_influence(0.0) {}
+    Node(int id) : id(id), influence(10.0), temp_influence(0.0) {}
 
     void add_following(shared_ptr<Node> node) {
         following.push_back(node);
@@ -58,15 +60,21 @@ public:
 
     void flow_influence_to_following() {
         for (auto& node : this->following) {
-            node->flow_influence(this->get_influence() / this->following.size()); // 가지고 있는 영향력을 N개의 노드에 나눠준다.
+            node->flow_influence(this->get_influence() / (2*this->following.size())); // following에게 영향력을 가진 영향력의 반만큼 흘려준다.
         }
-        this->influence -= this->get_influence(); // 나눠준 영향력만큼 영향력을 빼준다.
+        if (this->following.size() != 0) { // following이 없는 경우는 제외한다.
+            this->influence /= 2; // 영향력의 반만 남긴다.
+        }
+        else{ // following이 없는 경우는 explode를 방지하기 위해 영향력을 감소시킨다.
+            this->influence = this->influence * (1 - DECAY_RATE);
+        }
     }
 
     void logarithmic_influence() { // 최종 출력 전 영향력을 로그함수로 변환한다.
-        this->influence = log(this->influence);
+        this->influence = log(this->influence)/log(10);
     }
 
+    
 };
 
 class Network {
@@ -202,7 +210,7 @@ void write_marked_csv(string file_name, vector<float> influence) {
 int main() {
     Network network = make_network("tweeter.csv");
     // network.print();
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 5; i++) {
         network.flow_influence();
     }
     // 로그함수로 변환 전, 각 노드에 영향력을 1.0 증가시킨다.
@@ -214,13 +222,15 @@ int main() {
     // for (size_t i = 0; i < influence.size(); i++) {
     //     cout << i << " : " << influence[i] << endl;
     // }
-    
     // influnece 총 합 출력
     float sum = 0.0;
     for (size_t i = 0; i < influence.size(); i++) {
         sum += influence[i];
     }
     cout << "sum : " << sum << endl;
+
+    
+    
 
     // influnece 를 csv 파일로 저장
     ofstream file("influence.csv");

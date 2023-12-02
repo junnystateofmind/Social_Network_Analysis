@@ -1,1 +1,1 @@
-        } catch (const std::invalid_argument& e) {
+network.logarithmic_influence(); // 최종 출력 전 영향력을 로그함수로 변환한다.

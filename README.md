@@ -69,4 +69,4 @@ The influence scores can provide insights into which nodes are central in spread
 - Log scale을 10으로 적용했고, 이에 따라 초기 노드의 영향력을 10으로 설정하였습니다.
 - 출력하면 0~3까지의 4단계의 노드로 분류하도록 하였습니다.
 
-[Prototype.pdf](./Prototype.pdf)
+[Prototype.png](./Prototype.png)
